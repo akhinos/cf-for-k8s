@@ -1,0 +1,91 @@
+#@data/values
+---
+  system_domain: {{ .Values.domain | quote  }}
+  app_domains:
+  #@overlay/append
+  - {{ .Values.domain | quote }}
+  cf_admin_password: {{ .Values.cf_admin_password.password | quote }}
+  
+  cf_blobstore:
+    secret_key: {{ .Values.secret_key.password | quote }}
+  
+  cf_db:
+    admin_password: {{ .Values.cf_db_admin_password.password | quote }}
+  
+  capi:
+    database:
+      password: {{ .Values.capi_database_password.password | quote }}
+  
+  log_cache_client:
+    id: log-cache
+    secret: {{ .Values.log_cache_client.password | quote }}
+  
+  system_certificate:
+    #! This certificates and keys are base64 encoded and should be valid for *.system.cf.example.com
+    crt: &crt {{ .Values.system_certificate.certificate | b64enc | quote }}
+    key: &key {{ .Values.system_certificate.private_key | b64enc | quote }}
+    ca: {{ .Values.system_certificate.ca | b64enc | quote }}
+  
+  log_cache_ca:
+    crt: {{ .Values.log_cache_ca.certificate | b64enc | quote }}
+    key: {{ .Values.log_cache_ca.private_key | b64enc | quote }}
+  
+  log_cache:
+    crt: {{ .Values.log_cache.certificate | b64enc | quote }}
+    key: {{ .Values.log_cache.private_key | b64enc | quote }}
+  
+  log_cache_metrics:
+    crt: {{ .Values.log_cache_metrics.certificate | b64enc | quote }}
+    key: {{ .Values.log_cache_metrics.private_key | b64enc | quote }}
+  
+  log_cache_gateway:
+    crt: {{ .Values.log_cache_gateway.certificate | b64enc | quote }}
+    key: {{ .Values.log_cache_gateway.private_key | b64enc | quote }}
+  
+  log_cache_syslog:
+    crt: {{ .Values.log_cache_syslog.certificate | b64enc | quote }}
+    key: {{ .Values.log_cache_syslog.private_key | b64enc | quote }}
+  
+  metric_proxy:
+    ca:
+      crt: {{ .Values.metric_proxy_ca.certificate | b64enc | quote }} 
+      key: {{ .Values.metric_proxy_ca.private_key | b64enc | quote }} 
+    cert:
+      crt: {{ .Values.metric_proxy.certificate | b64enc | quote }} 
+      key: {{ .Values.metric_proxy.certificate | b64enc | quote }} 
+    
+  uaa:
+    database:
+      password: {{ .Values.uaa_db_password.password | quote }}
+    admin_client_secret: {{ .Values.uaa_admin_client_secret.password | quote }}
+    certificate:
+      crt: *crt
+      key: *key
+    jwt_policy:
+      signing_key: |
+{{  indent 8 .Values.uaa_jwt_policy_signing_key.private_key }}
+    encryption_key:
+      passphrase: {{ .Values.uaa_encryption_key_passphrase.password | quote }}
+    login:
+      service_provider:
+        key: |
+{{ indent 10 .Values.uaa_login_service_provider.private_key}}
+        certificate: |
+{{ indent 10 .Values.uaa_login_service_provider.certificate}}
+      
+  doppler:
+    tls:
+      crt: *crt
+      key: *key
+  
+  eirini:
+    tls:
+      crt: *crt
+      key: *key
+  
+  app_registry:
+    hostname: {{  regexReplaceAll "/.*$" .Values.docker_registry.repository ""}}
+    repository: {{  .Values.docker_registry.repository | quote }}
+    username: {{  .Values.docker_registry.username | quote }}
+    password: {{  .Values.docker_registry.password | quote }}
+          
