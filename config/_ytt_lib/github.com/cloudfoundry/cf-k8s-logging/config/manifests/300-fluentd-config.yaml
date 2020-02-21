@@ -51,3 +51,4 @@ data:
        flush_interval 10s
      </buffer>
     </match>
+    @include /fluentd/etc/conf.d/*/*.conf
