@@ -3,7 +3,7 @@
   system_domain: {{ .Values.domain | quote  }}
   app_domains:
   #@overlay/append
-  - {{ .Values.domain | quote }}
+  - {{ .Values.domain | replace "cf.ingress" "cfa.ingress" | quote }}
   cf_admin_password: {{ .Values.cf_admin_password.password | quote }}
   
   cf_blobstore:
