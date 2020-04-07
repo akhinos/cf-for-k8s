@@ -2,6 +2,7 @@ def init(self,domain=None,ytt_files=[],docker_registry=None):
   if not domain:
     fail("Mandatory parameter domain not set. Use --set domain=... to pass this parameter.")
   self.domain = domain
+  self.__class__.name = "cf-for-k8s"
   self.ytt_files = ytt_files
   self.docker_registry = docker_registry
   self.cf_admin_password = user_credential("cf-admin-password-shalm",username="admin")
