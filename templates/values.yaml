@@ -1,9 +1,9 @@
 #@data/values
 ---
-  system_domain: {{ .Values.domain | quote  }}
+  system_domain: {{ .Values._domain | quote  }}
   app_domains:
   #@overlay/append
-  - {{ .Values.domain | quote }}
+  - {{ .Values._domain | quote }}
   cf_admin_password: {{ .Values.cf_admin_password.password | quote }}
   
   cf_blobstore:
@@ -82,10 +82,11 @@
     tls:
       crt: *crt
       key: *key
-  
+
+{{ if .Values.docker_registry }}
   app_registry:
     hostname: {{  regexReplaceAll "/.*$" .Values.docker_registry.repository ""}}
     repository: {{  .Values.docker_registry.repository | quote }}
     username: {{  .Values.docker_registry.username | quote }}
     password: {{  .Values.docker_registry.password | quote }}
-          
+{{ end }}          

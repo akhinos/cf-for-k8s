@@ -1,7 +1,5 @@
 def init(self,domain=None,ytt_files=[],docker_registry=None):
-  if not domain:
-    fail("Mandatory parameter domain not set. Use --set domain=... to pass this parameter.")
-  self.domain = domain
+  self._domain = domain
   self.__class__.name = "cf-for-k8s"
   self.ytt_files = ytt_files
   self.docker_registry = docker_registry
@@ -10,7 +8,7 @@ def init(self,domain=None,ytt_files=[],docker_registry=None):
   self.cf_db_admin_password = user_credential("cf-db-admin-password-shalm",username="admin")
   self.capi_database_password = user_credential("capi-database-password-shalm",username="admin")
   self.ca = certificate("ca-shalm",is_ca=True)
-  self.system_certificate = certificate("system-certificate-shalm",signer=self.ca,domains=["*." + domain,"*.cf-system.svc.cluster.local" ])
+  self.system_certificate = certificate("system-certificate-shalm",signer=self.ca,domains=["*.cf-system.svc.cluster.local" ])
   self.log_cache_ca = certificate("log-cache-ca-shalm",is_ca=True)
   self.log_cache = certificate("log-cache-shalm",signer=self.log_cache_ca,domains=["log-cache"])
   self.log_cache_metrics = certificate("log-cache-metrics-shalm",signer=self.log_cache_ca,domains=["log-cache-metrics"])
@@ -31,7 +29,16 @@ def init(self,domain=None,ytt_files=[],docker_registry=None):
 def template(self,glob=""):
   return self.ytt("config",self.helm("templates",glob="values.yaml"),*self.ytt_files)
 
+def domain(self):
+  return self._domain
+
+def _set_domain(self,k8s):
+  if not self._domain:
+    self._domain = "cf.ingress." + k8s.host.partition('.')[2]
+
 def apply(self,k8s):
+  self._set_domain(k8s)
+  k8s.tool = "kapp"
   self.__apply(k8s)
   k8s.rollout_status("deployment","capi-api-server",namespace='cf-system')
   #   for ingress in k8s.watch("svc",'istio-ingressgateway',namespace='istio-system'):
@@ -43,8 +50,13 @@ def apply(self,k8s):
   #       print("Waiting for ingress to come up")
 
 
+def delete(self,k8s):
+  self._set_domain(k8s)
+  k8s.tool = "kapp"
+  self.__delete(k8s)
+
 def credentials(self):
-  return struct(username=self.cf_admin_password.username, password=self.cf_admin_password.password,url="https://api." + self.domain)
+  return struct(username=self.cf_admin_password.username, password=self.cf_admin_password.password,url="https://api." + self._domain)
 
 def uaa_credentials(self):
-  return struct(url="https://uaa." + self.domain,client_secret=self.uaa_admin_client_secret.password, client_id=self.uaa_admin_client_secret.username)
+  return struct(url="https://uaa." + self.domain(),client_secret=self.uaa_admin_client_secret.password, client_id=self.uaa_admin_client_secret.username)
