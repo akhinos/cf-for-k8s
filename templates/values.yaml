@@ -1,9 +1,9 @@
 #@data/values
 ---
-  system_domain: {{ .Values._domain | quote  }}
+  system_domain: {{ .Values.domain | quote  }}
   app_domains:
   #@overlay/append
-  - {{ .Values._domain | quote }}
+  - {{ .Values.domain | quote }}
   cf_admin_password: {{ .Values.cf_admin_password.password | quote }}
   
   cf_blobstore:

@@ -1,5 +1,5 @@
 def init(self,domain=None,ytt_files=[],docker_registry=None):
-  self._domain = domain
+  self.domain = domain
   self.__class__.name = "cf-for-k8s"
   self.ytt_files = ytt_files
   self.docker_registry = docker_registry
@@ -29,34 +29,23 @@ def init(self,domain=None,ytt_files=[],docker_registry=None):
 def template(self,glob=""):
   return self.ytt("config",self.helm("templates",glob="values.yaml"),*self.ytt_files)
 
-def domain(self):
-  return self._domain
-
-def _set_domain(self,k8s):
-  if not self._domain:
-    self._domain = "cf.ingress." + k8s.host.partition('.')[2]
 
 def apply(self,k8s):
-  self._set_domain(k8s)
+  if not self.domain:
+    fail("Mandatory parameter domain not set. Use --set domain=... to pass this parameter.")
   k8s.tool = "kapp"
   self.__apply(k8s)
   k8s.rollout_status("deployment","capi-api-server",namespace='cf-system')
-  #   for ingress in k8s.watch("svc",'istio-ingressgateway',namespace='istio-system'):
-  #     if ingress.status and ingress.status.loadBalancer and ingress.status.loadBalancer.ingress:
-  #       print("")
-  #       print("Please register your domain '*.{domain}' under '{ip}'".format(domain=self.domain, ip = ingress.status.loadBalancer.ingress[0]["ip"]))
-  #       break
-  #     else:
-  #       print("Waiting for ingress to come up")
 
 
 def delete(self,k8s):
-  self._set_domain(k8s)
+  if not self.domain:
+    fail("Mandatory parameter domain not set. Use --set domain=... to pass this parameter.")
   k8s.tool = "kapp"
   self.__delete(k8s)
 
 def credentials(self):
-  return struct(username=self.cf_admin_password.username, password=self.cf_admin_password.password,url="https://api." + self._domain)
+  return struct(username=self.cf_admin_password.username, password=self.cf_admin_password.password,url="https://api." + self.domain)
 
 def uaa_credentials(self):
-  return struct(url="https://uaa." + self.domain(),client_secret=self.uaa_admin_client_secret.password, client_id=self.uaa_admin_client_secret.username)
+  return struct(url="https://uaa." + self.domain,client_secret=self.uaa_admin_client_secret.password, client_id=self.uaa_admin_client_secret.username)
