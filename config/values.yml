@@ -25,6 +25,7 @@ cf_db:
 istio_static_ip: ""
 
 images:
+  cf_autodetect_builder: ""
   capi: ""
   nginx: ""
   cfroutesync: ""

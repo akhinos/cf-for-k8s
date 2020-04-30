@@ -21,6 +21,8 @@ images:
   ccng: #@ data.values.images.capi
 #@ if/end data.values.images.nginx:
   nginx: #@ data.values.images.nginx
+#@ if/end data.values.images.cf_autodetect_builder:
+  cf_autodetect_builder: #@ data.values.images.cf_autodetect_builder
 
 system_namespace: #@ data.values.system_namespace
 workloads_namespace: #@ data.values.workloads_namespace
