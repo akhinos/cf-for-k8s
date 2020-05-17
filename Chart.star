@@ -1,8 +1,8 @@
-def init(self,domain=None,ytt_files=[],docker_registry=None,app_domains = None):
+def init(self,domain=None,overlays=[],docker_registry=None,app_domains = None):
   self.domain = domain
   self.app_domains = app_domains
   self.__class__.name = "cf-for-k8s"
-  self.ytt_files = ytt_files
+  self.overlays = overlays
   self.docker_registry = docker_registry
   self.cf_admin_password = user_credential("cf-admin-password-shalm",username="admin")
   self.secret_key = user_credential("secret-key-shalm",username="admin")
@@ -27,10 +27,7 @@ def init(self,domain=None,ytt_files=[],docker_registry=None,app_domains = None):
   self.docker_registry_http_secret= user_credential("docker-registry-http-secret-shalm",username="admin")
 
 def template(self,glob=""):
-  ytt_files = self.ytt_files
-  if type(ytt_files)  == "function" or type(ytt_files)  == "builtin_function_or_method"  :
-    ytt_files = ytt_files()
-  return self.ytt("config",self.helm("templates",glob="values.yaml"),*ytt_files)
+  return self.ytt("config",inject("templates/values.yaml",self=self),*self.overlays)
 
 
 def apply(self,k8s):
