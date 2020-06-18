@@ -8,4 +8,4 @@ kind: Secret
 metadata:
   name: cf-values
 data:
-  cf-values.yaml: #@ base64.encode(yaml.encode(data.values))
+  cf-values.yaml: #@ base64.encode("#@data/values\n---\n" + yaml.encode(data.values))
