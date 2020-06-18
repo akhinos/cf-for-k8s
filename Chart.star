@@ -32,6 +32,9 @@ def init(self,domain=None,overlays=[],docker_registry=None,app_domains = None):
 def template(self,glob=""):
   return self.ytt("config",inject("templates/values.yaml",self=self),*self.overlays)
 
+def kapp_controller_values(self):
+  return str(self.ytt("kapp-controller/cf-values.yaml",inject("templates/values.yaml",self=self)))
+
 
 def apply(self,k8s):
   if not self.domain:
